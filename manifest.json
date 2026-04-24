@@ -1,6 +1,6 @@
 {
   "name": "Orandi",
-  "short_name": "Prayer",
+  "short_name": "Orandi",
   "description": "Pray around the world",
   "start_url": "/",
   "display": "standalone",
