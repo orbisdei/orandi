@@ -1,8 +1,8 @@
 {
-  "name": "Prayer Translator",
+  "name": "Orandi",
   "short_name": "Prayer",
-  "description": "Translate and explore prayers across traditions",
-  "start_url": "/Prayer Translator.html",
+  "description": "Pray around the world",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1a1208",

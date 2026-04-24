@@ -1,10 +1,9 @@
 const CACHE_NAME = 'prayer-translator-v1';
 
 const ASSETS_TO_CACHE = [
-  '/Prayer Translator.html',
-  '/Prayer Translator Android.html',
-  '/Prayer Translator iOS.html',
-  '/Prayer Translator v1.html',
+  '/index.html',
+  '/Orandi Android.html',
+  '/Orandi iOS.html',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
@@ -46,7 +45,7 @@ self.addEventListener('fetch', event => {
       });
     }).catch(() => {
       // If both cache and network fail, show offline page
-      return caches.match('/Prayer Translator.html');
+      return caches.match('/index.html');
     })
   );
 });
