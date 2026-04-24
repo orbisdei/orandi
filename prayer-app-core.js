@@ -1,5 +1,5 @@
 // prayer-app-core.js
-// Shared React components for Oratio Prayer Translator.
+// Shared React components for Orandi Orandi.
 // Imported by both iOS and Android wrappers.
 // Requires: prayer-data.js loaded first, React in scope via Babel.
 
@@ -50,7 +50,7 @@ const IC = {
 // ═══════════════════════════════════════════════════════
 // TOGGLE SWITCH
 // ═══════════════════════════════════════════════════════
-function OratioToggle({ on, onChange, accent }) {
+function OrandiToggle({ on, onChange, accent }) {
   return (
     <button onClick={() => onChange(!on)} style={{
       width:44, height:26, borderRadius:13, border:'none', cursor:'pointer',
@@ -70,7 +70,7 @@ function OratioToggle({ on, onChange, accent }) {
 // ═══════════════════════════════════════════════════════
 // SETTINGS SCREEN
 // ═══════════════════════════════════════════════════════
-function OratioSettings({ tweaks, onClose }) {
+function OrandiSettings({ tweaks, onClose }) {
   const t = THEMES[tweaks.theme];
   const labelStyle = { fontFamily:'Cinzel, serif', fontSize:9, color:t.textMuted, textTransform:'uppercase', letterSpacing:2.5, marginBottom:10, marginTop:20 };
   const rowStyle   = { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'13px 0', borderBottom:`1px solid ${t.rowBorder}` };
@@ -132,7 +132,7 @@ function OratioSettings({ tweaks, onClose }) {
               <div style={{ fontFamily:'Cinzel, serif', fontSize:12, color:t.text }}>{item.label}</div>
               <div style={{ fontFamily:'EB Garamond, serif', fontSize:12, color:t.textMuted, marginTop:1 }}>{item.sub}</div>
             </div>
-            <OratioToggle on={tweaks[item.key]} onChange={v => tweaks._set({[item.key]:v})} accent={t.accent} />
+            <OrandiToggle on={tweaks[item.key]} onChange={v => tweaks._set({[item.key]:v})} accent={t.accent} />
           </div>
         ))}
 
@@ -154,7 +154,7 @@ function OratioSettings({ tweaks, onClose }) {
         ))}
 
         <div style={{ fontFamily:'EB Garamond, serif', fontSize:12, color:t.textMuted, textAlign:'center', fontStyle:'italic', paddingTop:28 }}>
-          Oratio · Catholic Prayer Translator<br/>All translations are official liturgical texts.
+          Orandi · Catholic Prayer App<br/>All translations are official liturgical texts.
         </div>
       </div>
     </div>
@@ -164,7 +164,7 @@ function OratioSettings({ tweaks, onClose }) {
 // ═══════════════════════════════════════════════════════
 // PRAYER SELECTOR MODAL
 // ═══════════════════════════════════════════════════════
-function OratioPrayerModal({ currentId, onSelect, onClose, theme, lang }) {
+function OrandiPrayerModal({ currentId, onSelect, onClose, theme, lang }) {
   const t = THEMES[theme];
   const initCat = () => {
     const c = window.PRAYER_CATEGORIES.find(c => c.prayers.includes(currentId));
@@ -220,7 +220,7 @@ function OratioPrayerModal({ currentId, onSelect, onClose, theme, lang }) {
 // ═══════════════════════════════════════════════════════
 // LANGUAGE SELECTOR MODAL
 // ═══════════════════════════════════════════════════════
-function OratioLangModal({ side, currentLang, otherLang, onSelect, onClose, theme }) {
+function OrandiLangModal({ side, currentLang, otherLang, onSelect, onClose, theme }) {
   const t = THEMES[theme];
   return (
     <div style={{ position:'absolute', inset:0, zIndex:100, display:'flex', flexDirection:'column', justifyContent:'flex-end', background:'rgba(0,0,0,0.55)' }} onClick={onClose}>
@@ -350,7 +350,7 @@ function PrayerApp({ isLandscape, width, height, onToggleOrientation, tweaks }) 
     <div style={{ background:t.headerBg, color:t.headerText, flexShrink:0, borderBottom:hdrBorder }}>
       <div style={{ display:'flex', alignItems:'center', padding:'9px 12px', gap:8 }}>
         <span style={{ color:t.accent, opacity:.9, flexShrink:0 }}><IC.cross /></span>
-        <span style={{ fontFamily:'Cinzel, serif', fontSize:11, letterSpacing:3.5, fontWeight:600, textTransform:'uppercase', flexShrink:0 }}>Oratio</span>
+        <span style={{ fontFamily:'Cinzel, serif', fontSize:11, letterSpacing:3.5, fontWeight:600, textTransform:'uppercase', flexShrink:0 }}>Orandi</span>
         <button onClick={() => setShowPrayerModal(true)} style={{
           flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:5,
           background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.2)',
@@ -373,7 +373,7 @@ function PrayerApp({ isLandscape, width, height, onToggleOrientation, tweaks }) 
   const LandscapeHeader = () => (
     <div style={{ background:t.headerBg, color:t.headerText, flexShrink:0, display:'flex', alignItems:'center', padding:'0 10px', height:44, gap:8, borderBottom:hdrBorder }}>
       <span style={{ color:t.accent, opacity:.9 }}><IC.cross /></span>
-      <span style={{ fontFamily:'Cinzel, serif', fontSize:10, letterSpacing:3, fontWeight:600, textTransform:'uppercase', flexShrink:0 }}>Oratio</span>
+      <span style={{ fontFamily:'Cinzel, serif', fontSize:10, letterSpacing:3, fontWeight:600, textTransform:'uppercase', flexShrink:0 }}>Orandi</span>
       <button onClick={() => setShowPrayerModal(true)} style={{
         flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:5,
         background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.2)',
@@ -467,12 +467,12 @@ function PrayerApp({ isLandscape, width, height, onToggleOrientation, tweaks }) 
       <SplitPrayerView prayer={prayer} leftLang={leftLang} rightLang={rightLang} theme={theme} fontSize={fontSize} showVerseNumbers={showVerseNumbers} highlightActive={highlightActive} isLandscape={isLandscape} />
       <BottomNav />
 
-      {showPrayerModal && <OratioPrayerModal currentId={prayerId} onSelect={id => { setPrayerId(id); closeModal(() => setShowPrayerModal(false)); }} onClose={() => closeModal(() => setShowPrayerModal(false))} theme={theme} lang={leftLang} />}
-      {showLangModal   && <OratioLangModal side={showLangModal} currentLang={showLangModal==='left' ? leftLang : rightLang} otherLang={showLangModal==='left' ? rightLang : leftLang} onSelect={lang => { tweaks._set(showLangModal==='left' ? {leftLang:lang} : {rightLang:lang}); closeModal(() => setShowLangModal(null)); }} onClose={() => closeModal(() => setShowLangModal(null))} theme={theme} />}
-      {showSettings    && <OratioSettings tweaks={tweaks} onClose={() => closeModal(() => setShowSettings(false))} />}
+      {showPrayerModal && <OrandiPrayerModal currentId={prayerId} onSelect={id => { setPrayerId(id); closeModal(() => setShowPrayerModal(false)); }} onClose={() => closeModal(() => setShowPrayerModal(false))} theme={theme} lang={leftLang} />}
+      {showLangModal   && <OrandiLangModal side={showLangModal} currentLang={showLangModal==='left' ? leftLang : rightLang} otherLang={showLangModal==='left' ? rightLang : leftLang} onSelect={lang => { tweaks._set(showLangModal==='left' ? {leftLang:lang} : {rightLang:lang}); closeModal(() => setShowLangModal(null)); }} onClose={() => closeModal(() => setShowLangModal(null))} theme={theme} />}
+      {showSettings    && <OrandiSettings tweaks={tweaks} onClose={() => closeModal(() => setShowSettings(false))} />}
     </div>
   );
 }
 
 // Export everything to window for cross-script access
-Object.assign(window, { THEMES, IC, OratioToggle, OratioSettings, OratioPrayerModal, OratioLangModal, SplitPrayerView, PrayerApp });
+Object.assign(window, { THEMES, IC, OrandiToggle, OrandiSettings, OrandiPrayerModal, OrandiLangModal, SplitPrayerView, PrayerApp });

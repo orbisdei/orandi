@@ -3,23 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Oratio — iOS</title>
+<title>Orandi — Android</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script src="prayer-data.js"></script>
-<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="android-frame.jsx"></script>
 <script type="text/babel" src="tweaks-panel.jsx"></script>
 <script type="text/babel" src="prayer-app-core.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; background: #1a0f0a; display: flex; align-items: center; justify-content: center; }
+  html, body { height: 100%; background: #0d1117; display: flex; align-items: center; justify-content: center; }
   #root { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
   input[type=range] { -webkit-appearance: none; height: 4px; border-radius: 2px; outline: none; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; }
 </style>
+<!-- ============================================================
+     PASTE THIS BLOCK inside the <head> section of each HTML file
+     (Prayer Translator.html, Prayer Translator Android.html, etc.)
+     Put it just before the closing </head> tag
+     ============================================================ -->
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#c9a84c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prayer">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW failed:', err));
+    });
+  }
+</script>
 </head>
 <body>
 <div id="root"></div>
@@ -34,13 +56,13 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "highlightActive": true
 }/*EDITMODE-END*/;
 
-// iOS frame dimensions
-const FRAME_W  = 402;
-const FRAME_H  = 874;
-const STATUS_H = 62;   // iOS status bar (absolute, overlaps children)
-const HOME_H   = 34;   // home indicator (absolute)
-const APP_W    = FRAME_W;
-const APP_H    = FRAME_H - STATUS_H - HOME_H; // 778
+// Android frame dimensions
+// AndroidDevice: 412×892 outer, border:8px box-sizing:border-box
+// Inner screen: (412-16)×(892-16) = 396×876
+// StatusBar: 40px  NavBar: 24px  (both handled by AndroidDevice flex column)
+// Children area: 396 × (876 - 40 - 24) = 396 × 812
+const APP_W = 396;
+const APP_H = 812;
 
 function Root() {
   const [isLandscape, setIsLandscape] = React.useState(false);
@@ -63,13 +85,15 @@ function Root() {
     };
   }, []);
 
-  // Landscape: rotate a APP_H×APP_W (778×402) div 90° to fill the portrait frame
-  const LS_W = APP_H, LS_H = APP_W;
+  // Landscape: rotate APP_H×APP_W (812×396) div 90° inside APP_W×APP_H (396×812) children area
+  const LS_W = APP_H; // 812
+  const LS_H = APP_W; // 396
 
   return (
     <>
-      <IOSDevice dark={isDark}>
-        <div style={{ height:'100%', overflow:'hidden', position:'relative' }}>
+      <AndroidDevice dark={isDark}>
+        {/* AndroidDevice handles status bar & nav bar — children div is clean */}
+        <div style={{ width: APP_W, height: APP_H, overflow:'hidden', position:'relative' }}>
           {isLandscape ? (
             <div style={{
               position:'absolute', width:LS_W, height:LS_H,
@@ -81,13 +105,11 @@ function Root() {
                 onToggleOrientation={() => setIsLandscape(false)} tweaks={tweaks} />
             </div>
           ) : (
-            <div style={{ paddingTop:STATUS_H, height:'100%', display:'flex', flexDirection:'column', boxSizing:'border-box' }}>
-              <PrayerApp isLandscape={false} width={APP_W} height={APP_H}
-                onToggleOrientation={() => setIsLandscape(true)} tweaks={tweaks} />
-            </div>
+            <PrayerApp isLandscape={false} width={APP_W} height={APP_H}
+              onToggleOrientation={() => setIsLandscape(true)} tweaks={tweaks} />
           )}
         </div>
-      </IOSDevice>
+      </AndroidDevice>
 
       <TweaksPanel defaults={TWEAK_DEFAULTS} onUpdate={(k,v) => tweaks._set({[k]:v})}>
         <TweakSection title="Display">

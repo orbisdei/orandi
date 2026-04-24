@@ -1,4 +1,4 @@
-// prayer-data.js — Catholic Prayer Translator data
+// prayer-data.js — Catholic Orandi data
 // All translations are standard liturgical texts used at Mass and in official prayer books.
 
 window.LANG_NAMES = {
