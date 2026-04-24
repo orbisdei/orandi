@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Oratio — iOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="prayer-data.js"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="prayer-app-core.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #1a0f0a; display: flex; align-items: center; justify-content: center; }
+  #root { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  input[type=range] { -webkit-appearance: none; height: 4px; border-radius: 2px; outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "sepia",
+  "fontSize": 17,
+  "leftLang": "en",
+  "rightLang": "la",
+  "showVerseNumbers": false,
+  "highlightActive": true
+}/*EDITMODE-END*/;
+
+// iOS frame dimensions
+const FRAME_W  = 402;
+const FRAME_H  = 874;
+const STATUS_H = 62;   // iOS status bar (absolute, overlaps children)
+const HOME_H   = 34;   // home indicator (absolute)
+const APP_W    = FRAME_W;
+const APP_H    = FRAME_H - STATUS_H - HOME_H; // 778
+
+function Root() {
+  const [isLandscape, setIsLandscape] = React.useState(false);
+  const [tweakState,  setTweakState]  = React.useState(TWEAK_DEFAULTS);
+  const tweaks = { ...tweakState, _set: u => setTweakState(p => ({...p,...u})) };
+  const isDark = tweakState.theme === 'dark';
+
+  // Real device orientation
+  React.useEffect(() => {
+    const handler = () => {
+      const angle = window.screen?.orientation?.angle ?? (window.orientation || 0);
+      if (Math.abs(angle) === 90) setIsLandscape(true);
+      else setIsLandscape(false);
+    };
+    window.addEventListener('orientationchange', handler);
+    window.screen?.orientation?.addEventListener('change', handler);
+    return () => {
+      window.removeEventListener('orientationchange', handler);
+      window.screen?.orientation?.removeEventListener('change', handler);
+    };
+  }, []);
+
+  // Landscape: rotate a APP_H×APP_W (778×402) div 90° to fill the portrait frame
+  const LS_W = APP_H, LS_H = APP_W;
+
+  return (
+    <>
+      <IOSDevice dark={isDark}>
+        <div style={{ height:'100%', overflow:'hidden', position:'relative' }}>
+          {isLandscape ? (
+            <div style={{
+              position:'absolute', width:LS_W, height:LS_H,
+              top:'50%', left:'50%',
+              transform:'translate(-50%,-50%) rotate(90deg)',
+              overflow:'hidden',
+            }}>
+              <PrayerApp isLandscape={true} width={LS_W} height={LS_H}
+                onToggleOrientation={() => setIsLandscape(false)} tweaks={tweaks} />
+            </div>
+          ) : (
+            <div style={{ paddingTop:STATUS_H, height:'100%', display:'flex', flexDirection:'column', boxSizing:'border-box' }}>
+              <PrayerApp isLandscape={false} width={APP_W} height={APP_H}
+                onToggleOrientation={() => setIsLandscape(true)} tweaks={tweaks} />
+            </div>
+          )}
+        </div>
+      </IOSDevice>
+
+      <TweaksPanel defaults={TWEAK_DEFAULTS} onUpdate={(k,v) => tweaks._set({[k]:v})}>
+        <TweakSection title="Display">
+          <TweakSelect id="theme" label="Theme" options={[{value:'sepia',label:'Sepia'},{value:'dark',label:'Dark'},{value:'light',label:'Light'}]} />
+          <TweakSlider id="fontSize" label="Text size" min={13} max={24} step={1} />
+        </TweakSection>
+        <TweakSection title="Languages">
+          <TweakSelect id="leftLang" label="Primary" options={Object.entries(window.LANG_NAMES).map(([v,l])=>({value:v,label:l}))} />
+          <TweakSelect id="rightLang" label="Translation" options={Object.entries(window.LANG_NAMES).map(([v,l])=>({value:v,label:l}))} />
+        </TweakSection>
+        <TweakSection title="Reading">
+          <TweakToggle id="showVerseNumbers" label="Verse numbers" />
+          <TweakToggle id="highlightActive" label="Highlight on touch" />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
+</script>
+</body>
+</html>
